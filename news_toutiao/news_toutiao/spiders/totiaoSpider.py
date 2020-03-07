@@ -60,30 +60,32 @@ class ToutiaoSpider(scrapy.Spider):
        
         pass
  
-    # def parse_article(self, response):
-    #     """深层次采集使用"""
-    #     # print("频道页面")
-    #     # max_time=time.time()-1000*5
-    #     # print("response",response)
-    #     html = response.text
-    #     print("response.text",response.text)
-    #     json_text=self.replace(html)
-    #     # print("html",json_text)
-    #     data_json= json.loads(json_text)
-    #     print('data_json',data_json)
-    #     if data_json.get("success")==True:
-    #         item=self.item()
-    #         for i,line in enumerate( data_json['data']):
-    #             # print(line)
-    #             aid=line['url']
-    #             aid = aid.replace("http://toutiao.com/group/", "")
-    #             aid = aid.replace("/", "")
-    #             item['data']=line
-    #             item['aid']=aid
-    #             yield item    
-    #     # item=self.item()
-    #     # for i,line in enumerate( data_json):  
-    #     #     print(line)   
+    def parse_article(self, response):
+        """深层次采集使用"""
+        # print("频道页面")
+        # max_time=time.time()-1000*5
+        # print("response",response)
+        html = response.text
+        # print("response.text",response.text)
+        json_text=self.replace(html)
+        # print("html",json_text)
+        data_json= json.loads(json_text)
+        # print('data_json',data_json)
+        if data_json.get("success")==True:
+            item=self.item()
+            line=data_json['data']
+            # print(line)
+            aid=line['url']
+            # tkitText.Text.md5()
+            aid = aid.replace("http://toutiao.com/group/", "")
+            aid = aid.replace("/", "")
+            item['data']=line
+            item['aid']=aid
+            item['atype']="article"
+            yield item 
+        # item=self.item()
+        # for i,line in enumerate( data_json):  
+        #     print(line)   
     def auto_offset(self,url,p=20):
         # url = "https://www.toutiao.com/api/search/content/?aid=24&app_name=web_search&offset=0&format=json&keyword=%E6%B5%81%E6%B5%AA%E7%8C%AB&count=20&from=search_tab&pd=synthesis&timestamp=1583580720"
         urla = url.split("?")
@@ -135,13 +137,13 @@ class ToutiaoSpider(scrapy.Spider):
                             yield item 
                         except:
                             pass
-                    # if line.get('display_type_self')=='self_article':
-                    #     url="https://m.toutiao.com/i"+line.get('id')+"/info/"
-                    #     try:
-                    #         yield response.follow(url, callback=self.parse_article)     # it will filter duplication automatically
+                    if line.get('display_type_self')=='self_article':
+                        url="https://m.toutiao.com/i"+line.get('id')+"/info/"
+                        try:
+                            yield response.follow(url, callback=self.parse_article)     # it will filter duplication automatically
                             
-                    #     except:
-                    #         pass
+                        except:
+                            pass
 
         # item=self.item()
         # for i,line in enumerate( data_json):  

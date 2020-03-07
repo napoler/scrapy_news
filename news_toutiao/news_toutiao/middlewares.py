@@ -18,9 +18,10 @@ class SeleniumSpiderMiddleware(object):
     print("使用SeleniumSpiderMiddleware中间件")
     def __init__(self):
         option = Options()
-        option.add_argument('--headless')
+        # option.add_argument('--headless')
         self.driver = webdriver.Chrome(executable_path="tools/chromedriver",
                                        chrome_options=option)
+        self.set_cook=False
                                        
 
     def __del__(self):
@@ -30,8 +31,13 @@ class SeleniumSpiderMiddleware(object):
         print("request.url",request.url)
         self.driver.get(request.url)
         if request.url!="https://www.toutiao.com/":
-            self.set_cookies()
-            self.driver.refresh()
+
+            if self.set_cook ==True:
+                pass
+            else:
+                self.set_cookies()
+                self.driver.refresh()
+                self.set_cook ==True
         # print("页面开始渲染。。。")
         # self.driver.execute_script("scroll(0, 1000);")
         # time.sleep(1)

@@ -40,7 +40,7 @@ class NewsToutiaoPipeline(object):
                 # one["tag"]=item['data']['tag']
                 # news_pet
                 self.DB.article.insert_one(one) 
-                self.DB.article_list.update_one({"_id":one["_id"]},{"state":"Success"})
+                self.DB.article_list.update_one({"_id":one["_id"]},{"$set":{"state":"Success"}})
                 print("add")
             except:
                 print('err')
