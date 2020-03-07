@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+news_toutiao/news_toutiao/sgCookies.pickle
+
+
 # C extensions
 *.so
 
