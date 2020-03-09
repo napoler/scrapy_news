@@ -4,7 +4,7 @@ __pycache__/
 *$py.class
 
 news_toutiao/news_toutiao/sgCookies.pickle
-
+news_toutiao/news_toutiao/data/
 
 # C extensions
 *.so

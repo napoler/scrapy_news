@@ -18,7 +18,7 @@ class SeleniumSpiderMiddleware(object):
     print("使用SeleniumSpiderMiddleware中间件")
     def __init__(self):
         option = Options()
-        # option.add_argument('--headless')
+        option.add_argument('--headless')
         self.driver = webdriver.Chrome(executable_path="tools/chromedriver",
                                        chrome_options=option)
         self.set_cook=False
