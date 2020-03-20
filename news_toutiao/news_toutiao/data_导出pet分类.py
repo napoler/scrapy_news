@@ -15,7 +15,7 @@ from albert_pytorch import *
 client = pymongo.MongoClient("localhost", 27017)
 DB = client.scrapy_Toutiao
 print(DB.name)
-petclass = classify(model_name_or_path='data/petclass/',num_labels=10,device='cuda')
+petclass = classify(model_name_or_path='data/petclass/',num_labels=2,device='cuda')
 def get_article(id):
 
     return DB.article.find_one({"_id":id})
@@ -54,90 +54,119 @@ def clear_html_re(src_html):
 def auto_clear(text):
     txt = HTMLParser().unescape(text) #这样就得到了txt = '<abc>'
     return clear_html_re(txt)
-    
-i=0
-data=[]
-for it in  DB.article_list.find({}):
-
-                    # p = rankclass.pre(it['pt'])
-                    # if p>0:
-                    #     softmax=rankclass.softmax()
-    keys=get_keys(data_path="data/classifypet/train.json")
-    # print(keys)
-    if it['data']['tag']=="news_pet":
+def check_model():
+    """
+    对之前的训练数据重新筛选
+    """
+    tjson=tkitFile.Json(file_path="data/classifypet/train.json")
+    # tjson_b=tkitFile.Json(file_path="data/classifypet/train_b.json")
+    a=0
+    b=0
+    data=[]
+    for it in tjson.auto_load():
         # print(it)
-        one =get_article(it['data']['id'])
-        if one ==None:
-            pass
+        a=a+1
+        p=petclass.pre(it['sentence'])
+        if p==it['label']:
+            b=b+1
         else:
-            i=i+1
-            txt=one['title']+auto_clear(one['content'])
-            key=tkitText.Text().md5(txt)
-            if key not in keys:
-                
-                p=petclass.pre(txt[:500])
+            print(it['sentence'][:500])
+            print(it['label'])
+            mp=input("不一致:")
+            it['label']=int(mp)
+        data.append(it)
+        print("one",b,a,b/a)     
+    print(b,a,b/a)
+    add_data(data,path='data/classifypet/',name="train_b.json")
+# 对之前的训练数据重新筛选
+check_model()
+def run():
+    """
+    运行数据导出为宠物数据
+    """
+    i=0
+    data=[]
+    for it in  DB.article_list.find({}):
 
-                if p==1:
+                        # p = rankclass.pre(it['pt'])
+                        # if p>0:
+                        #     softmax=rankclass.softmax()
+        keys=get_keys(data_path="data/classifypet/train.json")
+        # print(keys)
+        if it['data']['tag']=="news_pet":
+            # print(it)
+            one =get_article(it['data']['id'])
+            if one ==None:
+                pass
+            else:
+                i=i+1
+                txt=one['title']+auto_clear(one['content'])
+                key=tkitText.Text().md5(txt)
+                if key not in keys:
+                    
+                    p=petclass.pre(txt[:500])
 
-                    item={
-                    "label":1,
-                    "sentence":txt
-                    }
-                    pass
-                else:
-                    print(txt[:500])
-                    print(p,1)
-                    print("已经标记：",i)
-                    mp=input("不一致:")
-                    try:
+                    if p==1:
+
                         item={
-                        "label":int(mp),
+                        "label":1,
                         "sentence":txt
                         }
-                    except:
-                        continue
                         pass
-                data.append(item)
-                keys.append(key)
-            # print(one['title'])
-            # print(one['title']+auto_clear(one['content']))
-    else:
-        one =get_article(it['data']['id'])
-        if one ==None:
-            pass
+                    else:
+                        print(txt[:500])
+                        print(p,1)
+                        print("已经标记：",i)
+                        mp=input("不一致:")
+                        try:
+                            item={
+                            "label":int(mp),
+                            "sentence":txt
+                            }
+                        except:
+                            continue
+                            pass
+                    data.append(item)
+                    keys.append(key)
+                # print(one['title'])
+                # print(one['title']+auto_clear(one['content']))
         else:
-            i=i+1
-            txt=one['title']+auto_clear(one['content'])
-            key=tkitText.Text().md5(txt)
-            if key not in keys:
+            one =get_article(it['data']['id'])
+            if one ==None:
+                pass
+            else:
+                i=i+1
+                txt=one['title']+auto_clear(one['content'])
+                key=tkitText.Text().md5(txt)
+                if key not in keys:
 
-                p=petclass.pre(txt[:500])
+                    p=petclass.pre(txt[:500])
 
 
-                if p==1:
-                    print(txt[:500])
-                    print(p,0)
-                    print("已经标记：",i)
-                    mp=input("不一致:")
-                    try:
+                    if p==1:
+                        print(txt[:500])
+                        print(p,0)
+                        print("已经标记：",i)
+                        mp=input("不一致:")
+                        try:
+                            item={
+                            "label":int(mp),
+                            "sentence":txt
+                            }
+                        except:
+                            continue
+                            pass
+                    else:
                         item={
-                        "label":int(mp),
-                        "sentence":txt
+                            "label":0,
+                            "sentence":txt
                         }
-                    except:
-                        continue
-                        pass
-                else:
-                    item={
-                        "label":0,
-                        "sentence":txt
-                    }
-                data.append(item)
-                keys.append(key)
-# print(i)
-    if i%10==0:
-        add_data(data,path='data/classifypet/',name="train.json")
-        data=[]
-print(len(data))
+                    data.append(item)
+                    keys.append(key)
+    # print(i)
+        if i%10==0:
+            add_data(data,path='data/classifypet/',name="train.json")
+            data=[]
+    print(len(data))
 
-add_data(data,path='data/classifypet/',name="train.json")
+    add_data(data,path='data/classifypet/',name="train.json")
