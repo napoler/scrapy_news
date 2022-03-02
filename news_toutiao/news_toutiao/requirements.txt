@@ -1,4 +1,4 @@
-Scrapy==2.0.0
+Scrapy==2.6.0
 albert_pytorch==0.0.1.9
 selenium==3.141.0
 pymongo==3.10.1
